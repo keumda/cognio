@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "COGNIO - 당신의 마음은 어디에서 멈춰 있나요?",
+        alt: "COGNIO - 나의 마음 성장 지도",
       },
     ],
   },
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "COGNIO - 나의 마음 성장 지도",
     description:
       "Erikson 발달심리학 기반 15문항 심리 테스트. 3분이면 나의 마음 성장 지도를 확인할 수 있어요.",
-    images: ["/opengraph-image"],
+    images: ["/api/og"],
   },
 };
 
