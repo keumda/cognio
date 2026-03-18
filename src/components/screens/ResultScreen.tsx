@@ -149,7 +149,7 @@ export default function ResultScreen() {
           }}
           className="flex-1 btn-3d btn-3d-white py-3 text-[13px]"
         >
-          {copied ? "복사 완료!" : "링크 복사"}
+          {copied ? "복사 완료!" : "내 결과 공유하기"}
         </button>
       </div>
     </div>
