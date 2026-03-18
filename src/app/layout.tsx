@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "COGNIO - 나의 마음 성장 지도",
   description:
     "발달심리학 기반 심리 테스트. 15문항으로 알아보는 나의 마음 성장 지도. 임상심리전문가 감수.",
-  metadataBase: new URL("https://cognio-test.com"),
+  metadataBase: new URL("https://cognio-test.vercel.app"),
   openGraph: {
     title: "당신의 마음은 어디에서 멈춰 있나요?",
     description:
@@ -13,16 +13,21 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "COGNIO",
     locale: "ko_KR",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "COGNIO - 당신의 마음은 어디에서 멈춰 있나요?",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "당신의 마음은 어디에서 멈춰 있나요?",
     description:
       "Erikson 발달심리학 기반 15문항 심리 테스트. 3분이면 나의 마음 성장 지도를 확인할 수 있어요.",
-  },
-  other: {
-    "og:image:width": "1200",
-    "og:image:height": "630",
+    images: ["/opengraph-image"],
   },
 };
 
