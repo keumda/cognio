@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* ── Inside Out 2 Color System ── */
+
+  /* Semantic */
+  --color-primary: #2A2475;       /* 따분이 Ennui — 깊은 네이비 퍼플 */
+  --color-secondary: #3E67C8;     /* 슬픔이 Sadness — 차분한 블루 */
+  --color-accent: #46C5B8;        /* 부럽이 Envy — 프레시 틸 */
+  --color-highlight: #E8D43A;     /* 기쁨이 Joy — 밝은 옐로 */
+  --color-success: #52B43C;       /* 까칠이 Disgust — 생동감 그린 */
+  --color-warning: #F36A16;       /* 불안이 Anxiety — 오렌지 */
+  --color-danger: #EF3320;        /* 버럭이 Anger — 레드 */
+  --color-subtle: #D6B8E8;        /* 당황이 Embarrassment — 라벤더 */
+
+  /* Surface & Layout */
+  --color-background: #F1EFE8;    /* 소심이 Fear — 따뜻한 웜 그레이 */
+  --color-surface: #FFFFFF;
+  --color-surface-blue: #f0f3fb;  /* sadness-50 */
+  --color-surface-warm: #fef3ec;  /* anxiety-50 */
+  --color-surface-purple: #fcf9fd; /* embarrassment-50 */
+  --color-text: #192950;          /* sadness-900 */
+  --color-text-gray: #60605d;     /* fear-900 */
+  --color-border: #d0cfe1;        /* ennui-100 */
+
+  /* Emotion Palette (full) */
+  --color-anxiety: #F36A16;
+  --color-joy: #E8D43A;
+  --color-disgust: #52B43C;
+  --color-sadness: #3E67C8;
+  --color-embarrassment: #D6B8E8;
+  --color-ennui: #2A2475;
+  --color-fear: #F1EFE8;
+  --color-anger: #EF3320;
+  --color-envy: #46C5B8;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraBold.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+::-webkit-scrollbar { width: 0; display: none; }
+html, body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* 모바일 반응형 기본 */
+img, svg, video { max-width: 100%; height: auto; }
+input, textarea, button { max-width: 100%; }
+.btn-3d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 3D Buttons (Duolingo layout, Inside Out colors) ── */
+.btn-3d {
+  position: relative;
+  border: none;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  transform: translateY(0);
+}
+.btn-3d:active { transform: translateY(3px); }
+.btn-3d:disabled { opacity: 0.5; pointer-events: none; }
+
+.btn-3d-primary {
+  background: #3E67C8;
+  color: white;
+  box-shadow: 0 4px 0 #2a4688;
+}
+.btn-3d-primary:active { box-shadow: 0 1px 0 #2a4688; }
+
+.btn-3d-green {
+  background: #46C5B8;
+  color: white;
+  box-shadow: 0 4px 0 #30867d;
+}
+.btn-3d-green:active { box-shadow: 0 1px 0 #30867d; }
+
+.btn-3d-accent {
+  background: #46C5B8;
+  color: white;
+  box-shadow: 0 4px 0 #30867d;
+}
+.btn-3d-accent:active { box-shadow: 0 1px 0 #30867d; }
+
+.btn-3d-highlight {
+  background: #E8D43A;
+  color: #2A2475;
+  box-shadow: 0 4px 0 #9e9027;
+}
+.btn-3d-highlight:active { box-shadow: 0 1px 0 #9e9027; }
+
+.btn-3d-white {
+  background: white;
+  color: #2A2475;
+  border: 2px solid #d0cfe1;
+  box-shadow: 0 4px 0 #d0cfe1;
+}
+.btn-3d-white:active { box-shadow: 0 1px 0 #d0cfe1; }
+
+.btn-3d-kakao {
+  background: #FEE500;
+  color: #391B1B;
+  box-shadow: 0 4px 0 #D4C200;
+}
+.btn-3d-kakao:active { box-shadow: 0 1px 0 #D4C200; }
+
+/* ── Transitions ── */
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes treeGrow {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.tree-grow { animation: treeGrow 0.5s ease forwards; }
+
+@keyframes growUp {
+  0% { transform: scaleY(0.3); opacity: 0.3; }
+  50% { transform: scaleY(1.1); opacity: 0.8; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+.grow-up { animation: growUp 1.5s ease forwards; transform-origin: bottom center; }
+
+/* ── Progress bar ── */
+.progress-track {
+  height: 12px;
+  background: #d0cfe1;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #46C5B8, #3E67C8);
+  transition: width 0.3s ease-out;
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 4px; right: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 999px;
+}

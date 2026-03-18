@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm)",
+      "Read(//private/tmp/**)",
+      "Bash(npx create-next-app@latest rewrite-app --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm --turbopack)",
+      "Bash(npx create-next-app@latest rewrite-app --typescript --tailwind --eslint --app --src-dir --no-import-alias --use-npm --turbopack --no-react-compiler)",
+      "Bash(cp -r /tmp/rewrite-app/* /Users/keum/WebstormProjects/mental/)",
+      "Bash(cp -r /tmp/rewrite-app/.eslintrc* /tmp/rewrite-app/.gitignore /tmp/rewrite-app/.next* /Users/keum/WebstormProjects/mental/)",
+      "Bash(cp /tmp/rewrite-app/.gitignore /Users/keum/WebstormProjects/mental/)",
+      "Bash(rm -rf /tmp/rewrite-app)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(find /Users/keum/WebstormProjects/mental/src -type f -name *.tsx -o -name *.ts -o -name *.jsx -o -name *.js)",
+      "Bash(npx next:*)",
+      "WebSearch",
+      "WebFetch(domain:orwell.distancing.im)",
+      "WebFetch(domain:www.chosun.com)",
+      "Bash(gh auth:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"Initial commit: Rewrite - 바이럴 심리 테스트 웹앱 프로토타입:*)"
+    ]
+  }
+}
