@@ -197,7 +197,7 @@ export default function PerfectionismProfile({ scores }: Props) {
                   {/* Rewrite direction */}
                   <div className="bg-[#f0f3fb] rounded-xl p-4 border-l-2 border-[#3E67C8]">
                     <p className="text-[13px] font-semibold text-[#2A2475] mb-2">
-                      {"\uD83D\uDD04"} Cognio 방향:
+                      {"\uD83D\uDD04"} COGNIO 방향:
                     </p>
                     <p className="text-[13px] text-[#374151] leading-[1.7]">
                       {data.rewriteDirection}

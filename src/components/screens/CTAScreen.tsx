@@ -97,7 +97,7 @@ export default function CTAScreen() {
 
       {/* 소셜 프루프 */}
       <p className="text-[13px] text-[#60605d] text-center mb-5">
-        {waitlistCount.toLocaleString()}명이 Cognio 앱을 기다리고 있어요
+        {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
       </p>
 
       {/* ── 플랜 비교 ── */}
@@ -175,12 +175,12 @@ export default function CTAScreen() {
       {/* 카카오 채널 */}
       <div className="bg-[#f0f3fb] rounded-xl p-4 mb-6 text-center">
         <p className="text-[13px] text-[#2A2475] font-medium mb-3">
-          카카오톡으로도 소식을 받을 수 있어요
+          카카오톡 오픈채팅에서도 소식을 받을 수 있어요
         </p>
         <button
           onClick={() => {
             track({ event: "kakao_channel_click", ...ctx });
-            window.open("https://pf.kakao.com/_cognio", "_blank");
+            window.open("https://open.kakao.com/o/pttGhymi", "_blank");
           }}
           className="w-full py-3 rounded-xl font-semibold text-[14px] active:scale-[0.97] transition-all flex items-center justify-center gap-2"
           style={{ backgroundColor: "#FEE500", color: "#391B1B" }}
@@ -188,7 +188,7 @@ export default function CTAScreen() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#391B1B">
             <path d="M12 3C6.48 3 2 6.58 2 10.95c0 2.82 1.86 5.29 4.66 6.69-.15.56-.96 3.58-1 3.73 0 .07.03.14.09.18a.16.16 0 00.15.01c.21-.03 2.43-1.6 3.45-2.34.54.08 1.09.12 1.65.12 5.52 0 10-3.58 10-7.95S17.52 3 12 3z" />
           </svg>
-          Cognio 카카오 채널 추가
+          COGNIO 오픈채팅 참여하기
         </button>
       </div>
 

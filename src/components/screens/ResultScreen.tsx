@@ -281,7 +281,7 @@ export default function ResultScreen() {
                 { icon: "\uD83D\uDCCA", title: `나머지 ${Math.max(stageScores.length - 2, 0)}개 단계 분석`, desc: "전체 5단계 상세 해석 · 관련 증상 · 프롬프트" },
                 { icon: "\uD83D\uDD0D", title: "경로별 심화 분석", desc: "당신의 완벽주의/애착/감정 패턴 상세 프로파일" },
                 { icon: "\uD83D\uDD17", title: "단계 간 연결 인사이트", desc: "낮은 단계들이 서로 어떻게 영향을 주는지" },
-                { icon: "\uD83C\uDFAF", title: "맞춤 코스 추천", desc: "결과 기반 Cognio 앱 코스 매칭" },
+                { icon: "\uD83C\uDFAF", title: "맞춤 코스 추천", desc: "결과 기반 COGNIO 앱 코스 매칭" },
               ].map((item) => (
                 <div key={item.title} className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-[#d0cfe1]">
                   <span className="text-[20px] flex-shrink-0">{item.icon}</span>
@@ -337,7 +337,7 @@ export default function ResultScreen() {
                       resultType: typeKey,
                       additionalCompleted,
                     });
-                    window.open("https://pf.kakao.com/_cognio", "_blank");
+                    window.open("https://open.kakao.com/o/pttGhymi", "_blank");
                     setUnlocked(true);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
@@ -346,7 +346,7 @@ export default function ResultScreen() {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="#391B1B">
                     <path d="M12 3C6.48 3 2 6.58 2 10.95c0 2.82 1.86 5.29 4.66 6.69-.15.56-.96 3.58-1 3.73 0 .07.03.14.09.18a.16.16 0 00.15.01c.21-.03 2.43-1.6 3.45-2.34.54.08 1.09.12 1.65.12 5.52 0 10-3.58 10-7.95S17.52 3 12 3z" />
                   </svg>
-                  카카오톡 알림 받기
+                  카카오톡 오픈채팅 참여하기
                 </button>
 
                 <div className="flex items-center gap-3 mb-2.5">
@@ -389,7 +389,7 @@ export default function ResultScreen() {
 
           <div
             ref={pathwayRef}
-            className="py-6 transition-all duration-500"
+            className="py-3 transition-all duration-500"
             style={{
               opacity: pathwayVisible ? 1 : 0,
               transform: pathwayVisible ? "translateY(0)" : "translateY(20px)",
@@ -400,18 +400,24 @@ export default function ResultScreen() {
 
           <div
             ref={connectionRef}
-            className="py-6 transition-all duration-500"
+            className="py-3 transition-all duration-500"
             style={{
               opacity: connectionVisible ? 1 : 0,
               transform: connectionVisible ? "translateY(0)" : "translateY(20px)",
             }}
           >
-            <ConnectionInsight stageScores={stageScores} userEmail={userEmail} />
+            <ConnectionInsight
+              stageScores={stageScores}
+              userEmail={userEmail}
+              pathway={selectedPath || ""}
+              additionalCompleted={additionalCompleted}
+              additionalScores={additionalScores}
+            />
           </div>
 
           <div
             ref={recommendationRef}
-            className="py-6 transition-all duration-500"
+            className="py-3 transition-all duration-500"
             style={{
               opacity: recommendationVisible ? 1 : 0,
               transform: recommendationVisible ? "translateY(0)" : "translateY(20px)",
@@ -428,10 +434,18 @@ export default function ResultScreen() {
             onClick={() => {
               track({ event: "cta_explore_click", pathway: selectedPath || "", resultType: typeKey, additionalCompleted });
               setScreen("cta");
+              window.scrollTo({ top: 0 });
             }}
             className="w-full py-3.5 btn-3d btn-3d-white text-[14px] text-[#2A2475] mb-3"
           >
-            Cognio 앱 자세히 알아보기
+            COGNIO 앱 자세히 알아보기
+          </button>
+
+          <button
+            onClick={handleRestart}
+            className="w-full py-3.5 btn-3d btn-3d-white text-[14px] text-[#2A2475] mb-3"
+          >
+            처음부터 다시하기
           </button>
         </>
       )}
@@ -473,12 +487,6 @@ export default function ResultScreen() {
         </p>
       </div>
 
-      <button
-        onClick={handleRestart}
-        className="w-full py-3 text-[13px] text-[#60605d] active:text-[#2A2475] transition-colors"
-      >
-        처음부터 다시하기
-      </button>
     </div>
   );
 }

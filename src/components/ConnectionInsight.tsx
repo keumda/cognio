@@ -5,10 +5,19 @@ import { connectionInsights, singleStageInsights } from "@/lib/connectionInsight
 import { stageAnalysisData } from "@/lib/stageAnalysis";
 import { courses } from "@/lib/recommendations";
 import { track } from "@/lib/tracking";
+import { AdditionalScores } from "@/lib/additionalScoring";
+import { perfectionismTypes } from "@/lib/perfectionismTypes";
+import { attachmentTypes } from "@/lib/attachmentTypes";
+import { emotionTypes } from "@/lib/emotionTypes";
+import { initiationTypes } from "@/lib/initiationTypes";
+import { useTestStore } from "@/store/useTestStore";
 
 interface Props {
   stageScores: number[]; // [72, 38, 65, 41, 78]
   userEmail?: string;
+  pathway: string;
+  additionalCompleted: boolean;
+  additionalScores: AdditionalScores;
 }
 
 function getBarColor(score: number): string {
@@ -17,7 +26,7 @@ function getBarColor(score: number): string {
   return "#F36A16";
 }
 
-export default function ConnectionInsight({ stageScores, userEmail }: Props) {
+export default function ConnectionInsight({ stageScores, userEmail, pathway, additionalCompleted, additionalScores }: Props) {
   const [notified, setNotified] = useState<Set<string>>(new Set());
 
   const lowStages = stageScores
@@ -44,8 +53,19 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
   const stage1Data = stageAnalysisData[lowest1.stage];
   const stage2Data = lowest2 ? stageAnalysisData[lowest2.stage] : null;
 
-  // 추천 코스 매칭
-  const recommendedCourses = insight.courseIds
+  // 추천 코스 매칭 — pathway 코스를 항상 첫 번째로 포함
+  const pathwayCourseMap: Record<string, string> = {
+    perfectionism: "perfectionism",
+    attachment: "attachment",
+    emotion: "emotion",
+    initiation: "initiative",
+  };
+  const pathwayCourseId = pathwayCourseMap[pathway] || "";
+  const insightCourseIds = insight.courseIds.filter((id) => id !== pathwayCourseId);
+  const finalCourseIds = pathwayCourseId
+    ? [pathwayCourseId, ...insightCourseIds].slice(0, 2)
+    : insight.courseIds.slice(0, 2);
+  const recommendedCourses = finalCourseIds
     .map((id) => courses.find((c) => c.id === id))
     .filter(Boolean) as typeof courses;
 
@@ -127,6 +147,13 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
           {insight.insight}
         </p>
 
+        {/* Pathway 심화 분석 or CTA */}
+        <PathwayInsightBlock
+          pathway={pathway}
+          additionalCompleted={additionalCompleted}
+          additionalScores={additionalScores}
+        />
+
         {/* Breaking point + 추천 코스를 하나의 블록으로 */}
         <div className="bg-[#f0f3fb] rounded-xl p-4">
           <p className="text-[13px] font-semibold text-[#2A2475] mb-2">
@@ -140,7 +167,7 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
           {recommendedCourses.length > 0 && (
             <div className="border-t border-[#3E67C8]/15 pt-3">
               <p className="text-[12px] text-[#60605d] mb-2.5">
-                이 패턴에 맞는 Cognio 훈련
+                이 패턴에 맞는 COGNIO 훈련
               </p>
               <div className="flex flex-col gap-2">
                 {recommendedCourses.map((course) => {
@@ -176,6 +203,166 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+const PATHWAY_LABELS: Record<string, string> = {
+  perfectionism: "완벽주의",
+  attachment: "애착",
+  emotion: "감정조절",
+  initiation: "주도성",
+};
+
+function PathwayInsightBlock({
+  pathway,
+  additionalCompleted,
+  additionalScores,
+}: {
+  pathway: string;
+  additionalCompleted: boolean;
+  additionalScores: AdditionalScores;
+}) {
+  const { setScreen, setCurrentAdditionalQuestion } = useTestStore();
+
+  if (!pathway) return null;
+
+  // 추가 설문 미완료 → CTA
+  if (!additionalCompleted) {
+    return (
+      <div className="my-5 bg-[#f8f6ff] rounded-xl p-4 border border-[#d0cfe1]">
+        <p className="text-[13px] font-semibold text-[#2A2475] mb-3">
+          {PATHWAY_LABELS[pathway]} 패턴을 더 구체적으로 분석할 수 있어요
+        </p>
+        <button
+          onClick={() => {
+            track({ event: "additional_cta_click", source: "connection_insight", pathway });
+            setCurrentAdditionalQuestion(1);
+            setScreen("additional");
+          }}
+          className="w-full py-2.5 text-[13px] font-semibold text-white bg-[#3E67C8] rounded-xl active:scale-[0.98] transition-transform"
+        >
+          추가 6문항 분석 받기
+        </button>
+      </div>
+    );
+  }
+
+  // 추가 설문 완료 → pathway별 인사이트
+  let content: React.ReactNode = null;
+
+  if (pathway === "perfectionism" && additionalScores.primaryType) {
+    const typeData = perfectionismTypes[additionalScores.primaryType];
+    if (typeData) {
+      content = (
+        <>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[18px]">{typeData.emoji}</span>
+            <span className="text-[14px] font-bold text-[#2A2475]">{typeData.name}</span>
+          </div>
+          <p className="text-[13px] text-[#60605d] mb-2 italic">{typeData.tagline}</p>
+          <p className="text-[13px] text-[#564a5d] leading-[1.7] mb-2">
+            위의 연결 패턴에 {typeData.name}이 결합되면, {additionalScores.primaryType === "shame"
+              ? "실수에 대한 수치심이 더 강하게 작동하여 새로운 시도를 더욱 어렵게 만들 수 있어요."
+              : additionalScores.primaryType === "avoidance"
+                ? "시작 자체를 피하는 패턴이 더 강화되어, 해야 할 일을 계속 미루게 될 수 있어요."
+                : "끊임없이 증명해야 한다는 압박이 번아웃을 가속시킬 수 있어요."}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {typeData.coreBeliefs.map((b) => (
+              <span key={b} className="text-[11px] text-[#8c89b4] bg-white px-2 py-1 rounded-full border border-[#d0cfe1]">{b}</span>
+            ))}
+          </div>
+        </>
+      );
+    }
+  }
+
+  if (pathway === "attachment" && additionalScores.attachmentType) {
+    const typeData = attachmentTypes[additionalScores.attachmentType];
+    if (typeData) {
+      content = (
+        <>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[18px]">{typeData.emoji}</span>
+            <span className="text-[14px] font-bold text-[#2A2475]">{typeData.name} ({typeData.nameEn})</span>
+          </div>
+          <p className="text-[13px] text-[#564a5d] leading-[1.7] mb-2">
+            위의 연결 패턴에 {typeData.name} 애착이 결합되면,
+            {additionalScores.attachmentType === "anxious"
+              ? " 관계에서의 불안이 다른 단계의 어려움을 더 크게 느끼게 만들 수 있어요."
+              : additionalScores.attachmentType === "dismissive"
+                ? " 도움을 요청하지 않는 패턴이 혼자 감당하려는 부담을 키울 수 있어요."
+                : additionalScores.attachmentType === "fearful"
+                  ? " 관계에 대한 양가적 감정이 일상의 다른 선택에도 영향을 줄 수 있어요."
+                  : " 안정적 관계 경험이 다른 단계의 회복에도 좋은 토대가 됩니다."}
+          </p>
+          <p className="text-[12px] text-[#8c89b4]">
+            불안 {additionalScores.anxiety}/15 · 회피 {additionalScores.avoidanceAxis}/15
+          </p>
+        </>
+      );
+    }
+  }
+
+  if (pathway === "emotion" && additionalScores.weakestArea) {
+    const typeData = emotionTypes[additionalScores.weakestArea];
+    if (typeData) {
+      content = (
+        <>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[18px]">{typeData.emoji}</span>
+            <span className="text-[14px] font-bold text-[#2A2475]">{typeData.name}이 가장 약해요</span>
+          </div>
+          <p className="text-[13px] text-[#564a5d] leading-[1.7] mb-2">
+            위의 연결 패턴과 함께 {typeData.name} 영역이 약하면,
+            {additionalScores.weakestArea === "awareness"
+              ? " 감정을 인식하지 못한 채 쌓이다가 한꺼번에 터지는 경험이 반복될 수 있어요."
+              : additionalScores.weakestArea === "acceptance"
+                ? " 감정을 억누르려는 시도가 오히려 더 큰 스트레스로 돌아올 수 있어요."
+                : " 감정은 알지만 대처 방법을 모르는 무력감이 반복될 수 있어요."}
+          </p>
+          <p className="text-[12px] text-[#8c89b4]">
+            인식 {additionalScores.awareness} · 수용 {additionalScores.acceptance} · 전략 {additionalScores.strategy}
+          </p>
+        </>
+      );
+    }
+  }
+
+  if (pathway === "initiation" && additionalScores.primaryChallenge) {
+    const typeData = initiationTypes[additionalScores.primaryChallenge];
+    if (typeData) {
+      content = (
+        <>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[18px]">{typeData.emoji}</span>
+            <span className="text-[14px] font-bold text-[#2A2475]">{typeData.name}</span>
+          </div>
+          <p className="text-[13px] text-[#564a5d] leading-[1.7] mb-2">
+            위의 연결 패턴에 {typeData.name} 패턴이 결합되면,
+            {additionalScores.primaryChallenge === "fear"
+              ? " 실패에 대한 공포가 시작 자체를 막아 악순환이 더 깊어질 수 있어요."
+              : additionalScores.primaryChallenge === "energy"
+                ? " 에너지 고갈로 변화를 시도할 여력 자체가 남아있지 않을 수 있어요."
+                : " 방향을 잡지 못해 시작과 포기를 반복하는 패턴이 강화될 수 있어요."}
+          </p>
+          <p className="text-[12px] text-[#8c89b4]">
+            실패공포 {additionalScores.fear} · 에너지 {additionalScores.energy} · 집중 {additionalScores.focus}
+          </p>
+        </>
+      );
+    }
+  }
+
+  if (!content) return null;
+
+  return (
+    <div className="my-5 bg-[#f8f6ff] rounded-xl p-4 border border-[#d0cfe1]">
+      <p className="text-[12px] text-[#3E67C8] font-semibold mb-2">
+        {PATHWAY_LABELS[pathway]} 심화 분석과의 연결
+      </p>
+      {content}
     </div>
   );
 }

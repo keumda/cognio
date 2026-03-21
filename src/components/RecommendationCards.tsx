@@ -135,7 +135,7 @@ export default function RecommendationCards({ testResult, userEmail }: Props) {
           {notified.has(hero.id) ? (
             <div className="bg-white rounded-xl p-4 text-center">
               <p className="text-[15px] text-[#2A2475] font-bold mb-1">
-                {"\uD83C\uDF89"} Cognio 앱 대기 등록 완료!
+                {"\uD83C\uDF89"} COGNIO 앱 대기 등록 완료!
               </p>
               <p className="text-[13px] text-[#60605d]">
                 앱 출시 시 이 코스를 가장 먼저 시작할 수 있어요
@@ -146,11 +146,11 @@ export default function RecommendationCards({ testResult, userEmail }: Props) {
               onClick={() => handleNotify(hero.id)}
               className="btn-3d btn-3d-white w-full py-3.5 text-[15px] text-[#2A2475]"
             >
-              Cognio 앱에서 이 코스 시작하기
+              COGNIO 앱에서 이 코스 시작하기
             </button>
           )}
           <p className="text-[11px] text-white/30 mt-3 text-center">
-            {waitlistCount.toLocaleString()}명이 Cognio 앱을 기다리고 있어요
+            {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
           </p>
         </div>
       </div>

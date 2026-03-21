@@ -28,74 +28,64 @@ export default function AttachmentMatrix({ scores }: Props) {
       </p>
 
       {/* 2x2 Matrix */}
-      <div className="relative mb-4">
-        <div className="relative">
+      <div className="mb-4">
+        {/* 회피 축 라벨 (상단, 좌측 라벨 폭+간격과 일치) */}
+        <div className="flex justify-between mb-1.5 text-[11px] text-[#8c89b4]" style={{ paddingLeft: 42 }}>
+          <span>낮은 회피</span>
+          <span>높은 회피</span>
+        </div>
+
+        <div className="flex gap-0">
+          {/* 불안 축 라벨 (좌측) — 그리드 상단/하단 끝 정렬 */}
+          <div className="shrink-0 pr-1.5 text-[11px] text-[#8c89b4] flex flex-col justify-between" style={{ width: 36 }}>
+            <span className="text-right leading-tight">높은<br/>불안</span>
+            <span className="text-right leading-tight">낮은<br/>불안</span>
+          </div>
+
           {/* Grid */}
-          <div className="grid grid-cols-2 grid-rows-2 gap-[2px] rounded-xl overflow-hidden border border-[#d0cfe1]">
-            {quadrants.map(({ key }) => {
-              const data = attachmentTypes[key];
-              const isUser = key === userType;
-              return (
-                <div
-                  key={key}
-                  className={`p-4 flex flex-col items-center justify-center text-center min-h-[100px] ${
-                    isUser ? "bg-opacity-15" : "bg-gray-50"
-                  }`}
-                  style={
-                    isUser
-                      ? {
-                          backgroundColor:
-                            key === "secure"
-                              ? "rgba(64,145,108,0.1)"
-                              : key === "anxious"
-                                ? "rgba(234,179,8,0.1)"
-                                : key === "dismissive"
-                                  ? "rgba(59,130,246,0.1)"
-                                  : "rgba(147,51,234,0.1)",
-                        }
-                      : undefined
-                  }
-                >
-                  <span className="text-[20px] mb-1">
-                    {data.emoji}
-                    {isUser && " \u25CF"}
-                  </span>
-                  <span
-                    className={`text-[13px] font-semibold ${
-                      isUser ? "text-[#2A2475]" : "text-[#60605d]"
+          <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-[2px] rounded-xl overflow-hidden border border-[#d0cfe1]">
+              {quadrants.map(({ key }) => {
+                const data = attachmentTypes[key];
+                const isUser = key === userType;
+                return (
+                  <div
+                    key={key}
+                    className={`p-4 flex flex-col items-center justify-center text-center min-h-[100px] ${
+                      isUser ? "bg-opacity-15" : "bg-gray-50"
                     }`}
+                    style={
+                      isUser
+                        ? {
+                            backgroundColor:
+                              key === "secure"
+                                ? "rgba(64,145,108,0.1)"
+                                : key === "anxious"
+                                  ? "rgba(234,179,8,0.1)"
+                                  : key === "dismissive"
+                                    ? "rgba(59,130,246,0.1)"
+                                    : "rgba(147,51,234,0.1)",
+                          }
+                        : undefined
+                    }
                   >
-                    {data.name}
-                  </span>
-                  <span className="text-[11px] text-[#8c89b4]">
-                    {data.nameEn}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Horizontal axis label — centered over the grid */}
-          <div className="absolute left-0 right-0 -top-6 flex items-center justify-center">
-            <div className="flex items-center gap-2 text-[11px] text-[#8c89b4]">
-              <span>낮은 회피</span>
-              <div className="w-16 h-px bg-[#d0cfe1] relative">
-                <span className="absolute right-[-2px] top-[-3px] text-[8px]">&#9654;</span>
-              </div>
-              <span>높은 회피</span>
+                    <span className="text-[20px] mb-1">
+                      {data.emoji}
+                      {isUser && " \u25CF"}
+                    </span>
+                    <span
+                      className={`text-[13px] font-semibold ${
+                        isUser ? "text-[#2A2475]" : "text-[#60605d]"
+                      }`}
+                    >
+                      {data.name}
+                    </span>
+                    <span className="text-[11px] text-[#8c89b4]">
+                      {data.nameEn}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-
-          {/* Vertical axis label — centered left of the grid */}
-          <div className="absolute -left-14 top-0 bottom-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-2 text-[11px] text-[#8c89b4]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
-              <span>낮은 불안</span>
-              <div className="h-12 w-px bg-[#d0cfe1] relative">
-                <span className="absolute bottom-[-4px] left-[-3px] text-[8px]">&#9654;</span>
-              </div>
-              <span>높은 불안</span>
-            </div>
-          </div>
         </div>
       </div>
 
