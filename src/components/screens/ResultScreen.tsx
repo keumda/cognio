@@ -251,7 +251,7 @@ export default function ResultScreen() {
       </div>
 
       {/* Type card */}
-      <div className="bg-[#f0f3fb] rounded-2xl p-5 mb-6">
+      <div className="bg-[#f0f3fb] rounded-2xl p-5 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[24px]">{typeData.emoji}</span>
           <h2 className="text-[18px] font-bold text-[#2A2475]">
@@ -264,7 +264,7 @@ export default function ResultScreen() {
       </div>
 
       {/* Stage accordion */}
-      <div className="py-4">
+      <div className="py-2">
         <StageAccordion stageScores={stageScores} limit={unlocked ? 5 : 2} />
       </div>
 
@@ -389,7 +389,7 @@ export default function ResultScreen() {
 
           <div
             ref={pathwayRef}
-            className="py-3 transition-all duration-500"
+            className="pt-1 pb-3 transition-all duration-500"
             style={{
               opacity: pathwayVisible ? 1 : 0,
               transform: pathwayVisible ? "translateY(0)" : "translateY(20px)",
@@ -400,7 +400,7 @@ export default function ResultScreen() {
 
           <div
             ref={connectionRef}
-            className="py-3 transition-all duration-500"
+            className="pt-4 pb-3 transition-all duration-500"
             style={{
               opacity: connectionVisible ? 1 : 0,
               transform: connectionVisible ? "translateY(0)" : "translateY(20px)",
@@ -417,7 +417,7 @@ export default function ResultScreen() {
 
           <div
             ref={recommendationRef}
-            className="py-3 transition-all duration-500"
+            className="pt-4 pb-3 transition-all duration-500"
             style={{
               opacity: recommendationVisible ? 1 : 0,
               transform: recommendationVisible ? "translateY(0)" : "translateY(20px)",
