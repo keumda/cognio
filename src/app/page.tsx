@@ -37,6 +37,10 @@ export default function Home() {
     setReady(true);
   }, [hydrate, setNickname]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [screen]);
+
   if (!ready) return null;
 
   let content;

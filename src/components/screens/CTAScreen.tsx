@@ -1,44 +1,31 @@
 "use client";
 
-/**
- * ── CTA 페이지: Cognio 앱 탐색 ──
- *
- * 이메일은 결과 게이트에서 이미 수집됨.
- * 이 페이지는 순수 탐색 + 플랜별 관심도 측정용.
- * 모든 CTA는 원클릭 (이메일 재입력 없음).
- *
- * ── Fake Door 구조 ──
- * 플랜 카드의 "관심 있어요" 버튼 클릭 수로 수요 측정.
- * Track: super_interest, max_interest, coach_interest, family_interest
- *
- * ── 분석 ──
- * 플랜별 관심 수 비교 = 가격 수용도 + ARPU 추정
- * AI(Max) vs Human(Coach) 비율 = 핵심 PMF 시그널
- * pathway별 플랜 선호 = 세그먼트별 monetization 전략
- */
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTestStore } from "@/store/useTestStore";
 import { track, getEventCount } from "@/lib/tracking";
 
 export default function CTAScreen() {
-  const { setScreen, selectedPath, additionalCompleted, getResultType } =
-    useTestStore();
-  const resultType = getResultType();
+  const setScreen = useTestStore((s) => s.setScreen);
+  const selectedPath = useTestStore((s) => s.selectedPath);
+  const additionalCompleted = useTestStore((s) => s.additionalCompleted);
+  const getResultType = useTestStore((s) => s.getResultType);
+
+  const resultType = useMemo(() => getResultType(), [getResultType]);
+  const ctx = useMemo(
+    () => ({ pathway: selectedPath || "", resultType, additionalCompleted }),
+    [selectedPath, resultType, additionalCompleted]
+  );
 
   const [feedback, setFeedback] = useState("");
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [waitlistCount, setWaitlistCount] = useState(0);
   const [interested, setInterested] = useState<Set<string>>(new Set());
 
-  const ctx = { pathway: selectedPath || "", resultType, additionalCompleted };
-
   useEffect(() => {
     track({ event: "cta_page_view", ...ctx });
     const count = getEventCount("email_submit");
     setWaitlistCount(127 + count);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ctx]);
 
   const handleInterest = (planId: string) => {
     track({ event: `${planId}_interest`, ...ctx });
@@ -46,7 +33,7 @@ export default function CTAScreen() {
   };
 
   return (
-    <div className="flex flex-col px-6 py-6 fade-in">
+    <div className="flex flex-col px-6 py-6">
       {/* Back */}
       <button
         onClick={() => setScreen("result")}
@@ -100,7 +87,7 @@ export default function CTAScreen() {
         {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
       </p>
 
-      {/* ── 플랜 비교 ── */}
+      {/* 플랜 비교 */}
       <h3 className="text-[16px] font-bold text-[#2A2475] mb-3 text-center">
         어떤 플랜이 끌리세요?
       </h3>
@@ -124,7 +111,6 @@ export default function CTAScreen() {
           </div>
         </div>
 
-        {/* Super */}
         <PlanCard
           name="Super"
           badge="MOST POPULAR"
@@ -137,7 +123,6 @@ export default function CTAScreen() {
           highlight
         />
 
-        {/* Max */}
         <PlanCard
           name="Max"
           badge="AI POWERED"
@@ -149,7 +134,6 @@ export default function CTAScreen() {
           onInterest={() => handleInterest("max")}
         />
 
-        {/* Coach */}
         <PlanCard
           name="Coach"
           badge="HUMAN EXPERT"
@@ -161,7 +145,6 @@ export default function CTAScreen() {
           onInterest={() => handleInterest("coach")}
         />
 
-        {/* Family */}
         <PlanCard
           name="Family"
           price="연 149,000원"
@@ -172,7 +155,7 @@ export default function CTAScreen() {
         />
       </div>
 
-      {/* 카카오 채널 */}
+      {/* 카카오 오픈채팅 */}
       <div className="bg-[#f0f3fb] rounded-xl p-4 mb-6 text-center">
         <p className="text-[13px] text-[#2A2475] font-medium mb-3">
           카카오톡 오픈채팅에서도 소식을 받을 수 있어요
@@ -182,7 +165,7 @@ export default function CTAScreen() {
             track({ event: "kakao_channel_click", ...ctx });
             window.open("https://open.kakao.com/o/pttGhymi", "_blank");
           }}
-          className="w-full py-3 rounded-xl font-semibold text-[14px] active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-xl font-semibold text-[14px] flex items-center justify-center gap-2"
           style={{ backgroundColor: "#FEE500", color: "#391B1B" }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#391B1B">
@@ -212,7 +195,7 @@ export default function CTAScreen() {
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="예: 매일 알림이 왔으면 좋겠어요 / AI 코칭이 궁금해요 / ..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-[#d0cfe1] text-[14px] outline-none focus:border-[#3E67C8] transition-colors resize-none h-[100px] mb-3"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#d0cfe1] text-[14px] outline-none focus:border-[#3E67C8] resize-none h-[100px] mb-3"
             />
             <div className="flex justify-end gap-2">
               <button
@@ -240,7 +223,6 @@ export default function CTAScreen() {
   );
 }
 
-// ── 플랜 카드 컴포넌트 ──
 function PlanCard({
   name,
   badge,
@@ -284,12 +266,8 @@ function PlanCard({
         <h4 className="text-[16px] font-bold text-[#2A2475]">{name}</h4>
         <div className="text-right">
           <p className="text-[17px] font-bold text-[#2A2475]">{price}</p>
-          {annual && (
-            <p className="text-[11px] text-[#60605d]">{annual}</p>
-          )}
-          {subprice && (
-            <p className="text-[11px] text-[#60605d]">{subprice}</p>
-          )}
+          {annual && <p className="text-[11px] text-[#60605d]">{annual}</p>}
+          {subprice && <p className="text-[11px] text-[#60605d]">{subprice}</p>}
         </div>
       </div>
       {description && (
@@ -305,12 +283,12 @@ function PlanCard({
       <button
         onClick={() => { if (!interested) onInterest(); }}
         disabled={interested}
-        className={`w-full py-3 rounded-xl font-semibold text-[14px] transition-all ${
+        className={`w-full py-3 rounded-xl font-semibold text-[14px] ${
           interested
             ? "bg-[#f0f3fb] text-[#3E67C8] border border-[#d0cfe1]"
             : highlight
-              ? "text-white active:scale-[0.97]"
-              : "border-2 border-[#3E67C8] text-[#3E67C8] active:scale-[0.97]"
+              ? "text-white"
+              : "border-2 border-[#3E67C8] text-[#3E67C8]"
         }`}
         style={!interested && highlight ? { backgroundColor: "#46C5B8" } : undefined}
       >

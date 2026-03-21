@@ -434,7 +434,6 @@ export default function ResultScreen() {
             onClick={() => {
               track({ event: "cta_explore_click", pathway: selectedPath || "", resultType: typeKey, additionalCompleted });
               setScreen("cta");
-              window.scrollTo({ top: 0 });
             }}
             className="w-full py-3.5 btn-3d btn-3d-white text-[14px] text-[#2A2475] mb-3"
           >
