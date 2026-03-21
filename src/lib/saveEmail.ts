@@ -19,8 +19,7 @@ export async function saveEmail(params: SaveEmailParams) {
     additional_completed: params.additionalCompleted ?? false,
   });
 
-  // 중복 이메일은 unique constraint로 무시 (23505 = unique_violation)
-  if (error && error.code !== "23505") {
+  if (error) {
     console.error("Failed to save email:", error.message);
   }
 }

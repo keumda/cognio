@@ -54,16 +54,18 @@ export async function GET(req: NextRequest) {
 
   // 퍼널 전환율
   const totalResults = resultList.length;
-  const totalEmails = emailList.length;
+  const totalEmailSubmissions = emailList.length;
+  const uniqueEmails = new Set(emailList.map((e) => e.email)).size;
   const totalShares = eventList.filter((e) => e.event === "share_click").length;
 
   return NextResponse.json({
     summary: {
       totalTestCompleted: totalResults,
-      totalEmailsCollected: totalEmails,
+      uniqueEmails,
+      totalEmailSubmissions,
       totalShares,
       conversionRate: totalResults > 0
-        ? `${((totalEmails / totalResults) * 100).toFixed(1)}%`
+        ? `${((uniqueEmails / totalResults) * 100).toFixed(1)}%`
         : "0%",
     },
     emailsBySource,

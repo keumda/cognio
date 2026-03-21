@@ -15,8 +15,8 @@ create table if not exists emails (
   created_at timestamptz default now()
 );
 
--- 이메일 중복 방지 (같은 source에서)
-create unique index if not exists emails_email_source_idx on emails (email, source);
+-- 중복 이메일 허용 (재방문/재테스트 세션별 저장)
+create index if not exists emails_email_idx on emails (email);
 
 -- 2. 테스트 결과 저장
 create table if not exists test_results (
