@@ -26,16 +26,21 @@ export async function GET(req: NextRequest) {
     emailsBySource[e.source] = (emailsBySource[e.source] || 0) + 1;
   }
 
-  // pathway별 테스트 완료 수
-  const resultsByPathway: Record<string, number> = {};
+  // pathway별 테스트 완료 수 (총 + 유니크)
+  const resultsByPathway: Record<string, { total: number; unique: number }> = {};
+  const emailSessionIds = new Set(emailList.map((e) => e.session_id).filter(Boolean));
   for (const r of resultList) {
-    resultsByPathway[r.pathway] = (resultsByPathway[r.pathway] || 0) + 1;
+    if (!resultsByPathway[r.pathway]) resultsByPathway[r.pathway] = { total: 0, unique: 0 };
+    resultsByPathway[r.pathway].total++;
+    if (emailSessionIds.has(r.session_id)) resultsByPathway[r.pathway].unique++;
   }
 
-  // resultType별 분포
-  const resultsByType: Record<string, number> = {};
+  // resultType별 분포 (총 + 유니크)
+  const resultsByType: Record<string, { total: number; unique: number }> = {};
   for (const r of resultList) {
-    resultsByType[r.result_type] = (resultsByType[r.result_type] || 0) + 1;
+    if (!resultsByType[r.result_type]) resultsByType[r.result_type] = { total: 0, unique: 0 };
+    resultsByType[r.result_type].total++;
+    if (emailSessionIds.has(r.session_id)) resultsByType[r.result_type].unique++;
   }
 
   // 이벤트별 카운트
@@ -90,18 +95,34 @@ export async function GET(req: NextRequest) {
             .map((e) => {
               const sid = e.session_id;
               const result = sid ? resultList.find((r) => r.session_id === sid) : null;
-              const sessionEvents = sid ? eventList.filter((ev) => ev.session_id === sid) : [];
+              const sessionEvents = sid
+                ? eventList
+                    .filter((ev) => ev.session_id === sid)
+                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                : [];
               return {
                 session_id: sid,
                 source: e.source,
                 signed_up_at: e.created_at,
+                // test_result 상세
                 nickname: result?.nickname || null,
                 pathway: result?.pathway || e.pathway,
                 result_type: result?.result_type || e.result_type,
                 stage_scores: result?.stage_scores || null,
+                answers: result?.answers || null,
                 additional_completed: result?.additional_completed || false,
+                additional_answers: result?.additional_answers || null,
+                additional_scores: result?.additional_scores || null,
+                // 이벤트 상세
                 event_count: sessionEvents.length,
-                events: sessionEvents.map((ev) => ev.event),
+                events: sessionEvents.map((ev) => ({
+                  event: ev.event,
+                  channel: ev.channel,
+                  source: ev.source,
+                  program_id: ev.program_id,
+                  feedback: ev.feedback,
+                  created_at: ev.created_at,
+                })),
                 shared: sessionEvents.some((ev) => ev.event === "share_click"),
                 share_channels: sessionEvents
                   .filter((ev) => ev.event === "share_click" && ev.channel)
