@@ -163,12 +163,23 @@ export default function ResultScreen() {
       <div className="flex gap-2">
         <button
           onClick={() => {
-            track({ event: "share_click", channel: "card", pathway: selectedPath || "" });
-            setScreen("share");
+            track({ event: "share_click", channel: "invite", pathway: selectedPath || "" });
+            if (navigator.share) {
+              navigator.share({
+                title: "COGNIO - 나의 마음 성장 지도",
+                text: "3분이면 알아보는 나의 마음 성장 지도. 한번 해봐!",
+                url: window.location.origin,
+              }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(window.location.origin).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              });
+            }
           }}
           className="flex-1 btn-3d btn-3d-primary py-3 text-[13px]"
         >
-          결과 카드 만들기
+          {copied ? "링크 복사 완료!" : "친구에게 테스트 보내기"}
         </button>
         <button
           onClick={() => {
@@ -177,7 +188,7 @@ export default function ResultScreen() {
           }}
           className="flex-1 btn-3d btn-3d-white py-3 text-[13px]"
         >
-          {copied ? "복사 완료!" : "내 결과 공유하기"}
+          내 결과 공유하기
         </button>
       </div>
     </div>
