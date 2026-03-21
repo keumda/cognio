@@ -29,6 +29,8 @@ import { useFadeIn } from "@/hooks/useFadeIn";
 import { TestResult } from "@/lib/recommendations";
 import { encodeResult } from "@/lib/resultUrl";
 import { track } from "@/lib/tracking";
+import { saveEmail } from "@/lib/saveEmail";
+import { saveResult } from "@/lib/saveResult";
 
 export default function ResultScreen() {
   const {
@@ -65,12 +67,37 @@ export default function ResultScreen() {
     }
   }, [answers, selectedPath, additionalCompleted, additionalAnswers, nickname, unlocked]);
 
+  // Save result to Supabase (once on mount)
+  const [resultSaved, setResultSaved] = useState(false);
+  useEffect(() => {
+    if (resultSaved || !selectedPath) return;
+    setResultSaved(true);
+    saveResult({
+      nickname,
+      pathway: selectedPath,
+      resultType: typeKey,
+      stagePercentages: percentages,
+      answers,
+      additionalCompleted,
+      additionalAnswers,
+      additionalScores: getAdditionalScores(),
+      unlocked,
+    });
+  }, [resultSaved, selectedPath]);
+
   const handleUnlock = useCallback(() => {
     if (!gateEmail || !gateEmail.includes("@")) return;
     track({
       event: "email_submit",
       source: "result_gate",
       email: gateEmail,
+      pathway: selectedPath || "",
+      resultType: typeKey,
+      additionalCompleted,
+    });
+    saveEmail({
+      email: gateEmail,
+      source: "result_gate",
       pathway: selectedPath || "",
       resultType: typeKey,
       additionalCompleted,
@@ -302,6 +329,13 @@ export default function ResultScreen() {
                 <button
                   onClick={() => {
                     track({ event: "email_submit", source: "result_gate_kakao", pathway: selectedPath || "", resultType: typeKey, additionalCompleted });
+                    saveEmail({
+                      email: "kakao_channel",
+                      source: "result_gate_kakao",
+                      pathway: selectedPath || "",
+                      resultType: typeKey,
+                      additionalCompleted,
+                    });
                     window.open("https://pf.kakao.com/_cognio", "_blank");
                     setUnlocked(true);
                     window.scrollTo({ top: 0, behavior: "smooth" });

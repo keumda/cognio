@@ -1,8 +1,8 @@
 /**
  * Cognio Fake Door 트래킹 유틸리티
  *
- * 모든 이벤트는 localStorage에 배열로 쌓임.
- * Supabase 연결 시 이 함수만 교체하면 됨.
+ * Supabase events 테이블 + localStorage 이중 저장.
+ * Supabase 실패 시 localStorage 폴백.
  *
  * ── 분석 가이드 ──
  *
@@ -28,6 +28,9 @@
  * - share_click 중 channel별 비율 → 어떤 공유 채널에 집중할지
  */
 
+import { supabase } from "./supabase";
+import { getSessionId } from "./session";
+
 export interface TrackEvent {
   event: string;
   timestamp?: string;
@@ -45,6 +48,7 @@ export interface TrackEvent {
 }
 
 export function track(event: TrackEvent) {
+  // localStorage 폴백 (항상)
   try {
     const existing: TrackEvent[] = JSON.parse(
       localStorage.getItem("rewrite_events") || "[]"
@@ -54,9 +58,29 @@ export function track(event: TrackEvent) {
   } catch {
     // ignore
   }
+
+  // Supabase 저장 (비동기, fire-and-forget)
+  supabase
+    .from("events")
+    .insert({
+      session_id: getSessionId(),
+      event: event.event,
+      pathway: event.pathway || null,
+      result_type: event.resultType || null,
+      additional_completed: event.additionalCompleted ?? null,
+      program_id: event.programId || null,
+      channel: event.channel || null,
+      source: event.source || null,
+      email: event.email || null,
+      feedback: event.feedback || null,
+      value: event.value || null,
+    })
+    .then(({ error }) => {
+      if (error) console.error("Failed to track event:", error.message);
+    });
 }
 
-/** 특정 이벤트 타입의 발생 횟수 */
+/** 특정 이벤트 타입의 발생 횟수 (localStorage 기준, 현재 세션용) */
 export function getEventCount(eventName: string): number {
   try {
     const events: TrackEvent[] = JSON.parse(
