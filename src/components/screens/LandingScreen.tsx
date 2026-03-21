@@ -52,7 +52,7 @@ export default function LandingScreen() {
 
       <div className="text-center text-[13px] text-[#60605d] pb-4">
         <span>✓ 개인정보 수집 없음 · 학술 이론 기반</span>
-        {count !== null && count > 0 && (
+        {count !== null && count > 10 && (
           <p className="mt-2 text-[#3E67C8] font-bold">
             {count.toLocaleString()}명이 참여했어요
           </p>

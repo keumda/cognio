@@ -151,9 +151,11 @@ export default function RecommendationCards({ testResult, userEmail }: Props) {
               COGNIO 앱에서 이 코스 시작하기
             </button>
           )}
-          <p className="text-[11px] text-white/30 mt-3 text-center">
-            {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
-          </p>
+          {waitlistCount > 10 && (
+            <p className="text-[11px] text-white/30 mt-3 text-center">
+              {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
+            </p>
+          )}
         </div>
       </div>
 

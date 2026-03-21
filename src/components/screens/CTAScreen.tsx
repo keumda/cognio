@@ -85,9 +85,11 @@ export default function CTAScreen() {
       </div>
 
       {/* 소셜 프루프 */}
-      <p className="text-[13px] text-[#60605d] text-center mb-5">
-        {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
-      </p>
+      {waitlistCount > 10 && (
+        <p className="text-[13px] text-[#60605d] text-center mb-5">
+          {waitlistCount.toLocaleString()}명이 COGNIO 앱을 기다리고 있어요
+        </p>
+      )}
 
       {/* 플랜 비교 */}
       <h3 className="text-[16px] font-bold text-[#2A2475] mb-3 text-center">
