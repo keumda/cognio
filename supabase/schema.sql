@@ -6,6 +6,7 @@
 -- 1. 이메일 수집 (최우선)
 create table if not exists emails (
   id bigint generated always as identity primary key,
+  session_id text,                    -- 3개 테이블 공통 키 (test_results, events와 JOIN)
   email text not null,
   source text not null default 'result_gate',  -- result_gate, result_gate_kakao, cta_notify 등
   pathway text,            -- perfectionism, attachment, emotion, initiation

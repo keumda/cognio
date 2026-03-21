@@ -81,5 +81,31 @@ export async function GET(req: NextRequest) {
       unlocked: r.unlocked,
       created_at: r.created_at,
     })),
+    // session 기반 통합 뷰: 이메일 제출한 유저의 전체 여정
+    users: emailList.map((e) => {
+      const sid = e.session_id;
+      const result = sid ? resultList.find((r) => r.session_id === sid) : null;
+      const userEvents = sid ? eventList.filter((ev) => ev.session_id === sid) : [];
+      return {
+        email: e.email,
+        source: e.source,
+        session_id: sid,
+        signed_up_at: e.created_at,
+        // 테스트 결과
+        nickname: result?.nickname || null,
+        pathway: result?.pathway || e.pathway,
+        result_type: result?.result_type || e.result_type,
+        stage_scores: result?.stage_scores || null,
+        additional_completed: result?.additional_completed || false,
+        unlocked: result?.unlocked || false,
+        // 이벤트 요약
+        event_count: userEvents.length,
+        events: userEvents.map((ev) => ev.event),
+        shared: userEvents.some((ev) => ev.event === "share_click"),
+        share_channels: userEvents
+          .filter((ev) => ev.event === "share_click" && ev.channel)
+          .map((ev) => ev.channel),
+      };
+    }),
   });
 }

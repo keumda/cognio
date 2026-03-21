@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { getSessionId } from "./session";
 
 interface SaveEmailParams {
   email: string;
@@ -10,6 +11,7 @@ interface SaveEmailParams {
 
 export async function saveEmail(params: SaveEmailParams) {
   const { error } = await supabase.from("emails").insert({
+    session_id: getSessionId(),
     email: params.email,
     source: params.source,
     pathway: params.pathway || null,
