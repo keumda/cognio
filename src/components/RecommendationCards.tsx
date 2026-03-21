@@ -16,7 +16,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { courses, TestResult } from "@/lib/recommendations";
-import { track, getEventCount } from "@/lib/tracking";
+import { track } from "@/lib/tracking";
 
 interface Props {
   testResult: TestResult;
@@ -42,9 +42,11 @@ export default function RecommendationCards({ testResult, userEmail }: Props) {
   const rest = courses.filter((c) => c.id !== hero.id);
 
   useEffect(() => {
-    const count = getEventCount("course_notify");
-    setWaitlistCount(127 + count);
-  }, [notified]);
+    fetch("/api/counts")
+      .then((r) => r.json())
+      .then((d) => setWaitlistCount(d.waitlist))
+      .catch(() => setWaitlistCount(127));
+  }, []);
 
   useEffect(() => {
     track({

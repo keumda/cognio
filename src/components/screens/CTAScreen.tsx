@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTestStore } from "@/store/useTestStore";
-import { track, getEventCount } from "@/lib/tracking";
+import { track } from "@/lib/tracking";
 
 export default function CTAScreen() {
   const setScreen = useTestStore((s) => s.setScreen);
@@ -23,8 +23,10 @@ export default function CTAScreen() {
 
   useEffect(() => {
     track({ event: "cta_page_view", ...ctx });
-    const count = getEventCount("email_submit");
-    setWaitlistCount(127 + count);
+    fetch("/api/counts")
+      .then((r) => r.json())
+      .then((d) => setWaitlistCount(d.waitlist))
+      .catch(() => setWaitlistCount(127));
   }, [ctx]);
 
   const handleInterest = (planId: string) => {

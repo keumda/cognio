@@ -4,19 +4,15 @@ import { useState, useEffect } from "react";
 import { useTestStore } from "@/store/useTestStore";
 import { LandingTree } from "@/components/TreeIllustration";
 
-const SEED_COUNT = 127;
-
 export default function LandingScreen() {
   const setScreen = useTestStore((s) => s.setScreen);
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
-    try {
-      const local = parseInt(localStorage.getItem("rewrite_completions") || "0");
-      setCount(SEED_COUNT + local);
-    } catch {
-      setCount(SEED_COUNT);
-    }
+    fetch("/api/counts")
+      .then((r) => r.json())
+      .then((d) => setCount(d.participants))
+      .catch(() => setCount(null));
   }, []);
 
   return (
