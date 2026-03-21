@@ -61,7 +61,7 @@ export const resultTypes: Record<string, ResultTypeData> = {
     poetic: "달려야 한다는 압박을 잠시 내려놓아도, 당신의 자리는 사라지지 않아요.",
   },
   "1,2": {
-    name: "세상에서 가장 작은 갑옷",
+    name: "갑옷 속에 숨은 사람",
     description: "신뢰와 자율이 모두 미해결이면, 타인을 믿기 어려우면서 동시에 자기 자신도 믿기 어려운 상태가 돼요. 하지만 이것을 알아차린 것 자체가 변화의 시작입니다.",
     emoji: "\uD83D\uDC1A",
     poetic: "작은 갑옷을 벗어도 괜찮은 세상이 있다는 걸, 조금씩 알아가봐요.",
