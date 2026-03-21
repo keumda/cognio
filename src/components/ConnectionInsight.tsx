@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { connectionInsights } from "@/lib/connectionInsights";
+import { connectionInsights, singleStageInsights } from "@/lib/connectionInsights";
 import { stageAnalysisData } from "@/lib/stageAnalysis";
 import { courses } from "@/lib/recommendations";
 import { track } from "@/lib/tracking";
@@ -25,17 +25,24 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
     .filter((x) => x.score < 50)
     .sort((a, b) => a.score - b.score);
 
-  if (lowStages.length < 2) return null;
+  if (lowStages.length === 0) return null;
 
   const lowest1 = lowStages[0];
-  const lowest2 = lowStages[1];
-  const comboKey = [lowest1.stage, lowest2.stage].sort().join(",");
-  const insight = connectionInsights[comboKey];
+  const isCombo = lowStages.length >= 2;
+  const lowest2 = isCombo ? lowStages[1] : null;
 
+  let insight;
+  if (isCombo && lowest2) {
+    const comboKey = [lowest1.stage, lowest2.stage].sort().join(",");
+    insight = connectionInsights[comboKey];
+  }
+  if (!insight) {
+    insight = singleStageInsights[String(lowest1.stage)];
+  }
   if (!insight) return null;
 
   const stage1Data = stageAnalysisData[lowest1.stage];
-  const stage2Data = stageAnalysisData[lowest2.stage];
+  const stage2Data = lowest2 ? stageAnalysisData[lowest2.stage] : null;
 
   // 추천 코스 매칭
   const recommendedCourses = insight.courseIds
@@ -58,11 +65,13 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
         {"\uD83D\uDD17"} 당신의 패턴은 이렇게 연결되어 있어요
       </h2>
       <p className="text-[14px] text-[#60605d] mb-5">
-        낮은 단계들이 서로 영향을 주고 있어요
+        {isCombo
+          ? "낮은 단계들이 서로 영향을 주고 있어요"
+          : "이 단계의 약함이 다른 영역으로 확장될 수 있어요"}
       </p>
 
       <div className="bg-white rounded-xl shadow-sm border border-[#d0cfe1] p-4">
-        {/* Connection diagram */}
+        {/* Diagram */}
         <div className="flex items-center justify-center gap-2 mb-5">
           <div
             className="rounded-xl px-3 py-2.5 text-center flex-1 max-w-[110px]"
@@ -84,20 +93,30 @@ export default function ConnectionInsight({ stageScores, userEmail }: Props) {
             <path d="M14 4l6 4-6 4" stroke="#8c89b4" strokeWidth="2" fill="none" />
           </svg>
 
-          <div
-            className="rounded-xl px-3 py-2.5 text-center flex-1 max-w-[110px]"
-            style={{
-              border: `2px solid ${getBarColor(lowest2.score)}`,
-              backgroundColor: `${getBarColor(lowest2.score)}10`,
-            }}
-          >
-            <div className="text-[20px] mb-1">{stage2Data.emoji}</div>
-            <div className="text-[13px] font-semibold text-[#2A2475]">{lowest2.stage}단계</div>
-            <div className="text-[12px] text-[#60605d]">{stage2Data.name}</div>
-            <div className="text-[14px] font-bold mt-1" style={{ color: getBarColor(lowest2.score) }}>
-              {lowest2.score}%
+          {isCombo && lowest2 && stage2Data ? (
+            <div
+              className="rounded-xl px-3 py-2.5 text-center flex-1 max-w-[110px]"
+              style={{
+                border: `2px solid ${getBarColor(lowest2.score)}`,
+                backgroundColor: `${getBarColor(lowest2.score)}10`,
+              }}
+            >
+              <div className="text-[20px] mb-1">{stage2Data.emoji}</div>
+              <div className="text-[13px] font-semibold text-[#2A2475]">{lowest2.stage}단계</div>
+              <div className="text-[12px] text-[#60605d]">{stage2Data.name}</div>
+              <div className="text-[14px] font-bold mt-1" style={{ color: getBarColor(lowest2.score) }}>
+                {lowest2.score}%
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-xl px-3 py-2.5 text-center flex-1 max-w-[130px] bg-[#f0f3fb] border-2 border-dashed border-[#d0cfe1]">
+              <div className="text-[14px] mb-0.5">
+                {recommendedCourses.map((c) => c.emoji).join(" ")}
+              </div>
+              <div className="text-[12px] font-semibold text-[#2A2475]">관계 · 행동 · 감정</div>
+              <div className="text-[11px] text-[#8c89b4]">파급 영역</div>
+            </div>
+          )}
         </div>
 
         {/* Title + Insight */}
