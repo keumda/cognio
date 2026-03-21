@@ -28,8 +28,17 @@ export default function RecommendationCards({ testResult, userEmail }: Props) {
   const [waitlistCount, setWaitlistCount] = useState(0);
   const [notified, setNotified] = useState<Set<string>>(new Set());
 
-  const matched = courses.filter((c) => c.condition(testResult));
-  const hero = matched[0] || courses[0];
+  // pathway에 매칭되는 코스를 hero로 우선 표시
+  const pathwayCourseMap: Record<string, string> = {
+    perfectionism: "perfectionism",
+    attachment: "attachment",
+    emotion: "emotion",
+    initiation: "initiative",
+  };
+  const pathwayCourseId = pathwayCourseMap[testResult.pathway];
+  const pathwayCourse = courses.find((c) => c.id === pathwayCourseId);
+  const matched = courses.filter((c) => c.condition(testResult) && c.id !== pathwayCourseId);
+  const hero = pathwayCourse || matched[0] || courses[0];
   const rest = courses.filter((c) => c.id !== hero.id);
 
   useEffect(() => {

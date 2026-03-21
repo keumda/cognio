@@ -29,32 +29,16 @@ export default function AttachmentMatrix({ scores }: Props) {
 
       {/* 2x2 Matrix */}
       <div className="relative mb-4">
-        {/* Axis labels */}
-        <div className="flex justify-between mb-1 px-1">
-          <span className="text-[11px] text-[#8c89b4]">낮은 회피</span>
-          <span className="text-[11px] text-[#8c89b4]">높은 회피</span>
-        </div>
-
-        <div className="flex">
-          {/* Left axis label */}
-          <div className="flex flex-col justify-between py-2 pr-1.5">
-            <span className="text-[11px] text-[#8c89b4] writing-mode-vertical">
-              높은 불안
-            </span>
-            <span className="text-[11px] text-[#8c89b4] writing-mode-vertical">
-              낮은 불안
-            </span>
-          </div>
-
+        <div className="relative">
           {/* Grid */}
-          <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-[2px] rounded-xl overflow-hidden border border-[#d0cfe1]">
-            {quadrants.map(({ key, row, col }) => {
+          <div className="grid grid-cols-2 grid-rows-2 gap-[2px] rounded-xl overflow-hidden border border-[#d0cfe1]">
+            {quadrants.map(({ key }) => {
               const data = attachmentTypes[key];
               const isUser = key === userType;
               return (
                 <div
                   key={key}
-                  className={`p-3 flex flex-col items-center justify-center text-center ${
+                  className={`p-4 flex flex-col items-center justify-center text-center min-h-[100px] ${
                     isUser ? "bg-opacity-15" : "bg-gray-50"
                   }`}
                   style={
@@ -89,6 +73,28 @@ export default function AttachmentMatrix({ scores }: Props) {
                 </div>
               );
             })}
+          </div>
+
+          {/* Horizontal axis label — centered over the grid */}
+          <div className="absolute left-0 right-0 -top-6 flex items-center justify-center">
+            <div className="flex items-center gap-2 text-[11px] text-[#8c89b4]">
+              <span>낮은 회피</span>
+              <div className="w-16 h-px bg-[#d0cfe1] relative">
+                <span className="absolute right-[-2px] top-[-3px] text-[8px]">&#9654;</span>
+              </div>
+              <span>높은 회피</span>
+            </div>
+          </div>
+
+          {/* Vertical axis label — centered left of the grid */}
+          <div className="absolute -left-14 top-0 bottom-0 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2 text-[11px] text-[#8c89b4]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+              <span>낮은 불안</span>
+              <div className="h-12 w-px bg-[#d0cfe1] relative">
+                <span className="absolute bottom-[-4px] left-[-3px] text-[8px]">&#9654;</span>
+              </div>
+              <span>높은 불안</span>
+            </div>
           </div>
         </div>
       </div>
