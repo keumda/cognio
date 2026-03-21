@@ -39,28 +39,35 @@ export default function Home() {
 
   if (!ready) return null;
 
+  let content;
   switch (screen) {
     case "landing":
-      return <LandingScreen />;
+      content = <LandingScreen />; break;
     case "nickname":
-      return <NicknameScreen />;
+      content = <NicknameScreen />; break;
     case "path":
-      return <PathScreen />;
+      content = <PathScreen />; break;
     case "question":
-      return <QuestionScreen />;
+      content = <QuestionScreen />; break;
     case "transition":
-      return <TransitionScreen />;
+      content = <TransitionScreen />; break;
     case "additional":
-      return <AdditionalQuestionScreen />;
+      content = <AdditionalQuestionScreen />; break;
     case "loading":
-      return <LoadingScreen />;
+      content = <LoadingScreen />; break;
     case "result":
-      return <ResultScreen />;
+      content = <ResultScreen />; break;
     case "share":
-      return <ShareScreen />;
+      content = <ShareScreen />; break;
     case "cta":
-      return <CTAScreen />;
+      content = <CTAScreen />; break;
     default:
-      return <LandingScreen />;
+      content = <LandingScreen />;
   }
+
+  return (
+    <div className="mx-auto max-w-[440px] min-h-dvh relative overflow-x-hidden">
+      {content}
+    </div>
+  );
 }

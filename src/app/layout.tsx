@@ -39,9 +39,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
-        <div className="mx-auto max-w-[440px] min-h-dvh relative overflow-x-hidden">
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );
