@@ -20,6 +20,10 @@ export type ScreenType =
   | "cta";
 
 interface TestState {
+  // Session (in-memory only, no browser storage)
+  sessionId: string;
+  isHydrated: boolean;
+
   // Screen navigation
   screen: ScreenType;
   setScreen: (screen: ScreenType) => void;
@@ -97,6 +101,9 @@ const questions = [
 ];
 
 export const useTestStore = create<TestState>((set, get) => ({
+  sessionId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+  isHydrated: false,
+
   screen: "landing",
   setScreen: (screen) => set({ screen }),
 
@@ -189,6 +196,7 @@ export const useTestStore = create<TestState>((set, get) => ({
 
   hydrate: (data) =>
     set({
+      isHydrated: true,
       screen: "result",
       nickname: data.nickname || "",
       unlocked: data.unlocked || false,
@@ -202,6 +210,8 @@ export const useTestStore = create<TestState>((set, get) => ({
 
   reset: () =>
     set({
+      sessionId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+      isHydrated: false,
       screen: "landing",
       nickname: "",
       unlocked: false,

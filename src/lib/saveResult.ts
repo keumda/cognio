@@ -1,6 +1,5 @@
 import { supabase } from "./supabase";
-import { getSessionId } from "./session";
-import { PathType } from "@/store/useTestStore";
+import { useTestStore, PathType } from "@/store/useTestStore";
 import { AdditionalScores } from "@/lib/additionalScoring";
 
 interface SaveResultParams {
@@ -17,7 +16,7 @@ interface SaveResultParams {
 
 export async function saveResult(params: SaveResultParams) {
   const { error } = await supabase.from("test_results").insert({
-    session_id: getSessionId(),
+    session_id: useTestStore.getState().sessionId,
     nickname: params.nickname || null,
     pathway: params.pathway,
     result_type: params.resultType,

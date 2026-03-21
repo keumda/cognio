@@ -29,7 +29,7 @@
  */
 
 import { supabase } from "./supabase";
-import { getSessionId } from "./session";
+import { useTestStore } from "@/store/useTestStore";
 
 export interface TrackEvent {
   event: string;
@@ -63,7 +63,7 @@ export function track(event: TrackEvent) {
   supabase
     .from("events")
     .insert({
-      session_id: getSessionId(),
+      session_id: useTestStore.getState().sessionId,
       event: event.event,
       pathway: event.pathway || null,
       result_type: event.resultType || null,

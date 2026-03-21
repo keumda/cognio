@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { getSessionId } from "./session";
+import { useTestStore } from "@/store/useTestStore";
 
 interface SaveEmailParams {
   email: string;
@@ -11,7 +11,7 @@ interface SaveEmailParams {
 
 export async function saveEmail(params: SaveEmailParams) {
   const { error } = await supabase.from("emails").insert({
-    session_id: getSessionId(),
+    session_id: useTestStore.getState().sessionId,
     email: params.email,
     source: params.source,
     pathway: params.pathway || null,

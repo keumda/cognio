@@ -46,6 +46,7 @@ export default function ResultScreen() {
     nickname,
     unlocked,
     setUnlocked,
+    isHydrated,
   } = useTestStore();
 
   const [copied, setCopied] = useState(false);
@@ -67,10 +68,10 @@ export default function ResultScreen() {
     }
   }, [answers, selectedPath, additionalCompleted, additionalAnswers, nickname, unlocked]);
 
-  // Save result to Supabase (once on mount)
+  // Save result to Supabase (once on mount, skip if hydrated from URL)
   const [resultSaved, setResultSaved] = useState(false);
   useEffect(() => {
-    if (resultSaved || !selectedPath) return;
+    if (resultSaved || !selectedPath || isHydrated) return;
     setResultSaved(true);
     saveResult({
       nickname,
@@ -83,7 +84,7 @@ export default function ResultScreen() {
       additionalScores: getAdditionalScores(),
       unlocked,
     });
-  }, [resultSaved, selectedPath]);
+  }, [resultSaved, selectedPath, isHydrated]);
 
   const handleUnlock = useCallback(() => {
     if (!gateEmail || !gateEmail.includes("@")) return;
