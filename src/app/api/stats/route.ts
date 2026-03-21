@@ -73,41 +73,61 @@ export async function GET(req: NextRequest) {
     resultsByType,
     eventCounts,
     shareByChannel,
-    recentEmails: emailList.slice(0, 20),
-    recentResults: resultList.slice(0, 20).map((r) => ({
-      id: r.id,
-      nickname: r.nickname,
-      pathway: r.pathway,
-      result_type: r.result_type,
-      stage_scores: r.stage_scores,
-      unlocked: r.unlocked,
-      created_at: r.created_at,
-    })),
-    // session 기반 통합 뷰: 이메일 제출한 유저의 전체 여정
-    users: emailList.map((e) => {
-      const sid = e.session_id;
-      const result = sid ? resultList.find((r) => r.session_id === sid) : null;
-      const userEvents = sid ? eventList.filter((ev) => ev.session_id === sid) : [];
-      return {
-        email: e.email,
-        source: e.source,
-        session_id: sid,
-        signed_up_at: e.created_at,
-        // 테스트 결과
-        nickname: result?.nickname || null,
-        pathway: result?.pathway || e.pathway,
-        result_type: result?.result_type || e.result_type,
-        stage_scores: result?.stage_scores || null,
-        additional_completed: result?.additional_completed || false,
-        unlocked: result?.unlocked || false,
-        // 이벤트 요약
-        event_count: userEvents.length,
-        events: userEvents.map((ev) => ev.event),
-        shared: userEvents.some((ev) => ev.event === "share_click"),
-        share_channels: userEvents
-          .filter((ev) => ev.event === "share_click" && ev.channel)
-          .map((ev) => ev.channel),
-      };
-    }),
+    // 이메일 기준 통합 유저 뷰 (같은 이메일 = 1명, 세션별 여정 포함)
+    users: (() => {
+      // 이메일별 그룹핑
+      const grouped: Record<string, typeof emailList> = {};
+      for (const e of emailList) {
+        const key = e.email;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(e);
+      }
+
+      return Object.entries(grouped)
+        .map(([email, entries]) => {
+          const sessions = entries
+            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+            .map((e) => {
+              const sid = e.session_id;
+              const result = sid ? resultList.find((r) => r.session_id === sid) : null;
+              const sessionEvents = sid ? eventList.filter((ev) => ev.session_id === sid) : [];
+              return {
+                session_id: sid,
+                source: e.source,
+                signed_up_at: e.created_at,
+                nickname: result?.nickname || null,
+                pathway: result?.pathway || e.pathway,
+                result_type: result?.result_type || e.result_type,
+                stage_scores: result?.stage_scores || null,
+                additional_completed: result?.additional_completed || false,
+                event_count: sessionEvents.length,
+                events: sessionEvents.map((ev) => ev.event),
+                shared: sessionEvents.some((ev) => ev.event === "share_click"),
+                share_channels: sessionEvents
+                  .filter((ev) => ev.event === "share_click" && ev.channel)
+                  .map((ev) => ev.channel),
+              };
+            });
+
+          const latest = sessions[sessions.length - 1];
+          return {
+            email,
+            total_sessions: sessions.length,
+            first_seen: sessions[0]?.signed_up_at || null,
+            last_seen: latest?.signed_up_at || null,
+            // 최근 세션 요약 (메인 행 표시용)
+            latest_nickname: latest?.nickname || null,
+            latest_pathway: latest?.pathway || null,
+            latest_result_type: latest?.result_type || null,
+            latest_stage_scores: latest?.stage_scores || null,
+            latest_additional_completed: latest?.additional_completed || false,
+            total_events: sessions.reduce((s, sess) => s + sess.event_count, 0),
+            ever_shared: sessions.some((s) => s.shared),
+            // 전체 세션 상세
+            sessions,
+          };
+        })
+        .sort((a, b) => new Date(b.last_seen || 0).getTime() - new Date(a.last_seen || 0).getTime());
+    })(),
   });
 }

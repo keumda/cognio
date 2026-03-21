@@ -3,6 +3,36 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
+interface UserSession {
+  session_id: string;
+  source: string;
+  signed_up_at: string;
+  nickname: string | null;
+  pathway: string;
+  result_type: string;
+  stage_scores: Record<string, number> | null;
+  additional_completed: boolean;
+  event_count: number;
+  events: string[];
+  shared: boolean;
+  share_channels: string[];
+}
+
+interface GroupedUser {
+  email: string;
+  total_sessions: number;
+  first_seen: string | null;
+  last_seen: string | null;
+  latest_nickname: string | null;
+  latest_pathway: string | null;
+  latest_result_type: string | null;
+  latest_stage_scores: Record<string, number> | null;
+  latest_additional_completed: boolean;
+  total_events: number;
+  ever_shared: boolean;
+  sessions: UserSession[];
+}
+
 interface Stats {
   summary: {
     totalTestCompleted: number;
@@ -16,38 +46,7 @@ interface Stats {
   resultsByType: Record<string, number>;
   eventCounts: Record<string, number>;
   shareByChannel: Record<string, number>;
-  recentEmails: Array<{
-    email: string;
-    source: string;
-    pathway: string;
-    session_id: string;
-    created_at: string;
-  }>;
-  recentResults: Array<{
-    id: number;
-    nickname: string;
-    pathway: string;
-    result_type: string;
-    stage_scores: Record<string, number>;
-    unlocked: boolean;
-    created_at: string;
-  }>;
-  users: Array<{
-    email: string;
-    source: string;
-    session_id: string;
-    signed_up_at: string;
-    nickname: string | null;
-    pathway: string;
-    result_type: string;
-    stage_scores: Record<string, number> | null;
-    additional_completed: boolean;
-    unlocked: boolean;
-    event_count: number;
-    events: string[];
-    shared: boolean;
-    share_channels: string[];
-  }>;
+  users: GroupedUser[];
 }
 
 const PATHWAY_LABELS: Record<string, string> = {
@@ -326,70 +325,154 @@ export default function DashboardPage() {
         </div>
 
         {/* User Journey Table */}
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <h3 className="text-[14px] font-semibold text-[#2A2475] mb-4">
-            유저 여정 <span className="text-[12px] font-normal text-gray-400">이메일 제출 유저 기준</span>
-          </h3>
-          {users.length === 0 ? (
-            <p className="text-[13px] text-gray-400">아직 데이터 없음</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">시간</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">이메일</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">채널</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">닉네임</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">경로</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">유형</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">단계 점수</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">심화</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">공유</th>
-                    <th className="text-left py-2 px-2 text-gray-500 font-medium">이벤트</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u, i) => (
-                    <tr key={`${u.session_id}-${i}`} className="border-b border-gray-50 hover:bg-gray-50">
-                      <td className="py-2 px-2 text-gray-500 whitespace-nowrap">{formatDate(u.signed_up_at)}</td>
-                      <td className="py-2 px-2 text-gray-800 font-medium max-w-[160px] truncate">{u.email}</td>
-                      <td className="py-2 px-2">
-                        <Pill color={u.source.includes("kakao") ? "yellow" : "blue"}>
-                          {SOURCE_LABELS[u.source] || u.source}
-                        </Pill>
-                      </td>
-                      <td className="py-2 px-2 text-gray-600">{u.nickname || "-"}</td>
-                      <td className="py-2 px-2">
-                        <Pill color="purple">{PATHWAY_LABELS[u.pathway] || u.pathway || "-"}</Pill>
-                      </td>
-                      <td className="py-2 px-2 text-gray-600">
-                        {u.result_type
-                          ? u.result_type.split(",").map((s) => STAGE_LABELS[s] || s).join("+")
-                          : "-"}
-                      </td>
-                      <td className="py-2 px-2"><StageBar scores={u.stage_scores} /></td>
-                      <td className="py-2 px-2">
-                        <Pill color={u.additional_completed ? "green" : "gray"}>
-                          {u.additional_completed ? "O" : "X"}
-                        </Pill>
-                      </td>
-                      <td className="py-2 px-2">
-                        {u.shared ? (
-                          <Pill color="orange">{u.share_channels.join(", ") || "O"}</Pill>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-2 text-gray-500">{u.event_count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <UserJourneyTable users={users} />
       </div>
     </div>
+  );
+}
+
+function UserJourneyTable({ users }: { users: GroupedUser[] }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggle = (email: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(email)) next.delete(email);
+      else next.add(email);
+      return next;
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <h3 className="text-[14px] font-semibold text-[#2A2475] mb-4">
+        유저 여정 <span className="text-[12px] font-normal text-gray-400">{users.length}명 (이메일 기준)</span>
+      </h3>
+      {users.length === 0 ? (
+        <p className="text-[13px] text-gray-400">아직 데이터 없음</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-2 px-2 text-gray-500 font-medium w-6"></th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">이메일</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">방문</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">최근 시간</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">닉네임</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">경로</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">유형</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">단계 점수</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">심화</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">공유</th>
+                <th className="text-left py-2 px-2 text-gray-500 font-medium">이벤트</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => {
+                const isOpen = expanded.has(u.email);
+                const hasMultiple = u.total_sessions > 1;
+                return (
+                  <UserRow key={u.email} user={u} isOpen={isOpen} hasMultiple={hasMultiple} onToggle={() => toggle(u.email)} />
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UserRow({ user: u, isOpen, hasMultiple, onToggle }: { user: GroupedUser; isOpen: boolean; hasMultiple: boolean; onToggle: () => void }) {
+  return (
+    <>
+      {/* Main row */}
+      <tr
+        className={`border-b border-gray-50 hover:bg-gray-50 ${hasMultiple ? "cursor-pointer" : ""}`}
+        onClick={hasMultiple ? onToggle : undefined}
+      >
+        <td className="py-2 px-2 text-gray-400">
+          {hasMultiple && (
+            <span className={`inline-block transition-transform text-[10px] ${isOpen ? "rotate-90" : ""}`}>&#9654;</span>
+          )}
+        </td>
+        <td className="py-2 px-2 text-gray-800 font-medium max-w-[180px] truncate">
+          {u.email}
+          {u.email === "kakao_channel" && <span className="ml-1 text-[10px] text-yellow-600">(카카오)</span>}
+        </td>
+        <td className="py-2 px-2">
+          {hasMultiple ? (
+            <Pill color="blue">{u.total_sessions}회</Pill>
+          ) : (
+            <span className="text-gray-400">1회</span>
+          )}
+        </td>
+        <td className="py-2 px-2 text-gray-500 whitespace-nowrap">{u.last_seen ? formatDate(u.last_seen) : "-"}</td>
+        <td className="py-2 px-2 text-gray-600">{u.latest_nickname || "-"}</td>
+        <td className="py-2 px-2">
+          {u.latest_pathway ? (
+            <Pill color="purple">{PATHWAY_LABELS[u.latest_pathway] || u.latest_pathway}</Pill>
+          ) : "-"}
+        </td>
+        <td className="py-2 px-2 text-gray-600">
+          {u.latest_result_type
+            ? u.latest_result_type.split(",").map((s) => STAGE_LABELS[s] || s).join("+")
+            : "-"}
+        </td>
+        <td className="py-2 px-2"><StageBar scores={u.latest_stage_scores} /></td>
+        <td className="py-2 px-2">
+          <Pill color={u.latest_additional_completed ? "green" : "gray"}>
+            {u.latest_additional_completed ? "O" : "X"}
+          </Pill>
+        </td>
+        <td className="py-2 px-2">
+          {u.ever_shared ? <Pill color="orange">O</Pill> : <span className="text-gray-400">-</span>}
+        </td>
+        <td className="py-2 px-2 text-gray-500">{u.total_events}</td>
+      </tr>
+
+      {/* Expanded session rows */}
+      {isOpen && u.sessions.map((s, i) => (
+        <tr key={s.session_id || i} className="bg-[#fafbff] border-b border-gray-50">
+          <td className="py-1.5 px-2"></td>
+          <td className="py-1.5 px-2 text-[11px] text-gray-400 pl-4">
+            세션 {i + 1}
+            <span className="ml-2">
+              <Pill color={s.source.includes("kakao") ? "yellow" : "blue"}>
+                {SOURCE_LABELS[s.source] || s.source}
+              </Pill>
+            </span>
+          </td>
+          <td className="py-1.5 px-2"></td>
+          <td className="py-1.5 px-2 text-[11px] text-gray-400 whitespace-nowrap">{formatDate(s.signed_up_at)}</td>
+          <td className="py-1.5 px-2 text-[11px] text-gray-500">{s.nickname || "-"}</td>
+          <td className="py-1.5 px-2">
+            {s.pathway ? (
+              <Pill color="purple">{PATHWAY_LABELS[s.pathway] || s.pathway}</Pill>
+            ) : "-"}
+          </td>
+          <td className="py-1.5 px-2 text-[11px] text-gray-500">
+            {s.result_type
+              ? s.result_type.split(",").map((st) => STAGE_LABELS[st] || st).join("+")
+              : "-"}
+          </td>
+          <td className="py-1.5 px-2"><StageBar scores={s.stage_scores} /></td>
+          <td className="py-1.5 px-2">
+            <Pill color={s.additional_completed ? "green" : "gray"}>
+              {s.additional_completed ? "O" : "X"}
+            </Pill>
+          </td>
+          <td className="py-1.5 px-2">
+            {s.shared ? (
+              <Pill color="orange">{s.share_channels.join(", ") || "O"}</Pill>
+            ) : (
+              <span className="text-gray-400">-</span>
+            )}
+          </td>
+          <td className="py-1.5 px-2 text-[11px] text-gray-400">{s.event_count}</td>
+        </tr>
+      ))}
+    </>
   );
 }
